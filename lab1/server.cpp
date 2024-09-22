@@ -67,21 +67,21 @@ void Server::handle_client(const int client_socket) {
             }
 
             if (request_type == 0) {
-                int data_size;
+                long long data_size;
                 recv(client_socket, &data_size, sizeof(data_size), 0);
                 LOG("DATA SIZE: " + std::to_string(data_size));
 
                 has_result_.store(false);
-                clear_data();
-                raw_data_size_ = data_size;
-                raw_data_ = new unsigned char[raw_data_size_];
+                clear_computation();
+                computation_.data_size = data_size;
+                computation_.data = new unsigned char[data_size];
 
-                if (raw_data_ == nullptr) {
+                if (computation_.data == nullptr) {
                     throw std::runtime_error("Failed to allocate memory");
                 }
                 ssize_t readed = 0;
                 while (readed < data_size) {
-                    ssize_t n = recv(client_socket, raw_data_ + readed,
+                    ssize_t n = recv(client_socket, computation_.data + readed,
                                      data_size - readed, 0);
                     if (n > 0) {
                         readed += n;
@@ -93,11 +93,14 @@ void Server::handle_client(const int client_socket) {
                 }
 
                 std::thread(&Server::perform_computation, this).detach();
-
                 send_ack(client_socket);
                 LOG("Received data for computation");
             } else if (request_type == 1) {
                 send_computation_status(client_socket);
+            } else if (request_type == 2) {
+                is_stress_test_ = !is_stress_test_;
+                send_ack(client_socket);
+                LOG(std::format("Server stress test is: {}", is_stress_test_.load()));
             }
         }
     } catch (std::runtime_error &e) {
@@ -111,10 +114,15 @@ void Server::handle_client(const int client_socket) {
 void Server::send_computation_status(const int client_socket) {
     if (has_result_.load()) {
         std::lock_guard lock(compute_mutex_);
-        const int result_size = raw_data_size_;
-
+        long long result_size = sizeof(computation_.computed_time);
+        if (!is_stress_test_.load()) {
+            result_size += computation_.data_size;
+        }
         send(client_socket, &result_size, sizeof(result_size), 0);
-        send(client_socket, raw_data_, result_size, 0);
+        send(client_socket, &computation_.computed_time, sizeof(computation_.computed_time), 0);
+        if (!is_stress_test_.load()) {
+            send(client_socket, computation_.data, result_size, 0);
+        }
         wait_ack(client_socket);
 
         LOG("Sent computation result to client");
@@ -128,19 +136,24 @@ void Server::send_computation_status(const int client_socket) {
 void Server::perform_computation() {
     has_result_ = false;
     std::lock_guard lock(compute_mutex_);
-    const ComputitionData packed_data = unpack_raw(raw_data_, raw_data_size_);
-    compute(packed_data);
-    pack_raw(packed_data, raw_data_);
-    delete_data(packed_data);
-
+    compute(computation_.data, computation_.data_size, &computation_.computed_time);
+    if (is_stress_test_) {
+        clear_data();
+    }
     has_result_ = true;
 }
 
 void Server::clear_data() {
-    if (raw_data_ != nullptr) {
-        delete[] raw_data_;
-        raw_data_size_ = 0;
+    if (computation_.data != nullptr) {
+        delete[] computation_.data;
+        computation_.data = nullptr;
+        computation_.data_size = 0;
     }
+}
+
+void Server::clear_computation() {
+    clear_data();
+    computation_.computed_time = 0;
 }
 
 

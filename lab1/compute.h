@@ -1,7 +1,4 @@
 #pragma once
 
-#include "utils.h"
 
-
-
-void compute(ComputitionData data);
+void compute(unsigned char *data, long long size, double *time);

@@ -1,12 +1,18 @@
 #pragma once
 
-struct ComputitionData {
-    int n;
-    unsigned char*** matrices; // хранит транспонированные матрицы
+struct Computation {
+    signed long long data_size;
+    unsigned char* data;
+    double computed_time;
 };
 
-ComputitionData unpack_raw(const unsigned char* raw_data, int size);
+// struct ComputationData {
+//     int n;
+//     unsigned char* raw_data; // хранит транспонированные матрицы
+// };
 
-void pack_raw(const ComputitionData& data, unsigned char* raw_data);
-
-void delete_data(const ComputitionData& data);
+// ComputitionData unpack_raw(unsigned char* raw_data, int size);
+//
+// void pack_raw(const ComputitionData& data, unsigned char* raw_data);
+//
+// void delete_data(const ComputitionData& data);

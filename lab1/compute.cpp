@@ -1,18 +1,20 @@
 #include "compute.h"
+
+#include <assert.h>
 #include <cstdint>
 #include <stdio.h>
 #include <time.h>
 
-uint8_t galois_multiply_by_2(const uint8_t value) {
+uint8_t galois_multiply_by_2(const unsigned char value) {
     return (value << 1) ^ ((value & 0x80) ? 0x1B : 0x00);
 }
 
-uint8_t galois_multiply_by_3(const uint8_t value) {
+uint8_t galois_multiply_by_3(const unsigned char value) {
     return galois_multiply_by_2(value) ^ value;
 }
 
-void mix_single_column(uint8_t *column) {
-    uint8_t temp[4];
+void mix_single_column(unsigned char* column) {
+    unsigned char temp[4];
 
     temp[0] = galois_multiply_by_2(column[0]) ^ galois_multiply_by_3(column[1]) ^ column[2] ^ column[3];
     temp[1] = column[0] ^ galois_multiply_by_2(column[1]) ^ galois_multiply_by_3(column[2]) ^ column[3];
@@ -24,19 +26,20 @@ void mix_single_column(uint8_t *column) {
     }
 }
 
-void mix_columns(uint8_t **state) {
+void mix_columns(unsigned char* matrix) {
     for (int i = 0; i < 4; i++) {
-        mix_single_column(state[i]);
+        mix_single_column(matrix + i * 4);
     }
 }
 
-void compute(const ComputitionData data) {
+void compute(unsigned char* data, const long long size, double* time) {
     clock_t start = clock();
-    for (int i = 0; i < data.n; i++) {
-        mix_columns(data.matrices[i]);
+    assert(size % 16 == 0);
+    for (long long i = 0; i < size / 16; i++) {
+        mix_columns(data + i * 16);
     }
     clock_t end = clock();
 
-    double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("Время выполнения: %.6f секунд\n", cpu_time_used);
+    *time = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Время выполнения: %.6f секунд\n", *time);
 }
