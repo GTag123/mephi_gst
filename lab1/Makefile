@@ -2,7 +2,7 @@ SOURCES := $(wildcard *.cpp)
 RESULT := main
 
 OBJECTS := $(SOURCES:.cpp=.o)
-CFLAGS := -std=c++20
+CFLAGS := -std=c++20 -fopenmp
 
 all: run
 
@@ -15,7 +15,7 @@ compile: $(SOURCES) $(RESULT)
 	g++ -c $(CFLAGS) $< -o $@
 
 $(RESULT): $(OBJECTS)
-	g++ $(OBJECTS) -o $(RESULT)
+	g++ $(CFLAGS) $(OBJECTS) -o $(RESULT)
 
 clean:
 	rm -f $(OBJECTS) $(RESULT)
