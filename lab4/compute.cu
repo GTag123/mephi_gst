@@ -29,7 +29,7 @@ __global__ void mix_columns_kernel(unsigned char *data, long long num_blocks) {
     long long step = gridDim.x * blockDim.x;
 
 
-    for (long long i = idx; i < num_blocks + step; i += step) {
+    for (long long i = idx; i < num_blocks; i += step) {
         if (i < num_blocks) {
             mix_single_column(data + i * 16);
         }
