@@ -44,7 +44,6 @@ def save_matrices_to_text_file(matrices: np.ndarray, filename: str):
 
 
 if __name__ == '__main__':
-    compute_cnt = int(input("compute_cnt: "))
     is_stress = bool(int(input("Is stress: ")))
     type = int(input("Type: "))
     count = 0
@@ -61,7 +60,7 @@ if __name__ == '__main__':
     del matrices
     gc.collect()
 
-    process = subprocess.run(['mpirun', '-np', f"{compute_cnt}", "./main"], check=True)
+    process = subprocess.run(["./main"], check=True)
 
     if not is_stress:
         in_matrices = load_matrices_from_binary_file('data.bin')

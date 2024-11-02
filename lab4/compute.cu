@@ -26,8 +26,13 @@ __device__ void mix_single_column(unsigned char *column) {
 
 __global__ void mix_columns_kernel(unsigned char *data, long long num_blocks) {
     long long idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < num_blocks) {
-        mix_single_column(data + idx * 16);
+    long long step = gridDim.x * blockDim.x;
+
+
+    for (long long i = idx; i < num_blocks + step; i += step) {
+        if (i < num_blocks) {
+            mix_single_column(data + i * 16);
+        }
     }
 }
 
@@ -39,7 +44,7 @@ void compute(unsigned char *data, const long long size) {
     cudaMemcpy(d_data, data, size * sizeof(unsigned char), cudaMemcpyHostToDevice);
 
     int threads_per_block = 256;
-    int blocks_per_grid = (num_blocks + threads_per_block - 1) / threads_per_block;
+    int blocks_per_grid = 1024;
 
     mix_columns_kernel<<<blocks_per_grid, threads_per_block>>>(d_data, num_blocks);
     cudaDeviceSynchronize();
@@ -80,6 +85,7 @@ int main(int argc, char *argv[]) {
     clock_t start = clock();
     compute(data, total_size);
     clock_t end = clock();
+    cudaDeviceReset();
 
     double elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
     FILE *info_file = fopen("info.bin", "wb");
@@ -93,9 +99,9 @@ int main(int argc, char *argv[]) {
     fclose(info_file);
 
     // Запись данных (опционально)
-    // FILE *fp_out = fopen("output.bin", "wb");
-    // fwrite(data, 1, total_size, fp_out);
-    // fclose(fp_out);
+    FILE *fp_out = fopen("output.bin", "wb");
+    fwrite(data, 1, total_size, fp_out);
+    fclose(fp_out);
 
     free(data);
     printf("Total size: %lld, Elapsed time: %.6f seconds\n", total_size, elapsed_time);

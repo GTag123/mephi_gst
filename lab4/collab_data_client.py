@@ -44,7 +44,7 @@ def stress_test(tread_count: int, m_count: int):
     del matrices
     gc.collect()
 
-    subprocess.run(['mpirun', '-np', f"{tread_count}", "--oversubscribe", "./main"], check=True)
+    subprocess.run(["./main"], check=True)
     print(get_info())
 
     os.remove("data.bin")
@@ -59,43 +59,44 @@ if __name__ == '__main__':
     stress_test(tread_count, 1000000)
     stress_test(tread_count, 10000000)
     stress_test(tread_count, 100000000)
+    stress_test(tread_count, 300000000)
 
-    print("2 thread")
-    tread_count = 2
-    stress_test(tread_count, 10000)
-    stress_test(tread_count, 100000)
-    stress_test(tread_count, 1000000)
-    stress_test(tread_count, 10000000)
-    stress_test(tread_count, 100000000)
+    # print("2 thread")
+    # tread_count = 2
+    # stress_test(tread_count, 10000)
+    # stress_test(tread_count, 100000)
+    # stress_test(tread_count, 1000000)
+    # stress_test(tread_count, 10000000)
+    # stress_test(tread_count, 100000000)
 
-    print("4 thread")
-    tread_count = 4
-    stress_test(tread_count, 10000)
-    stress_test(tread_count, 100000)
-    stress_test(tread_count, 1000000)
-    stress_test(tread_count, 10000000)
-    stress_test(tread_count, 100000000)
+    # print("4 thread")
+    # tread_count = 4
+    # stress_test(tread_count, 10000)
+    # stress_test(tread_count, 100000)
+    # stress_test(tread_count, 1000000)
+    # stress_test(tread_count, 10000000)
+    # stress_test(tread_count, 100000000)
 
-    print("8 thread")
-    tread_count = 8
-    stress_test(tread_count, 10000)
-    stress_test(tread_count, 100000)
-    stress_test(tread_count, 1000000)
-    stress_test(tread_count, 10000000)
-    stress_test(tread_count, 100000000)
+    # print("8 thread")
+    # tread_count = 8
+    # stress_test(tread_count, 10000)
+    # stress_test(tread_count, 100000)
+    # stress_test(tread_count, 1000000)
+    # stress_test(tread_count, 10000000)
+    # stress_test(tread_count, 100000000)
 
-    print("16 thread")
-    tread_count = 16
-    stress_test(tread_count, 10000)
-    stress_test(tread_count, 100000)
-    stress_test(tread_count, 1000000)
-    stress_test(tread_count, 10000000)
-    stress_test(tread_count, 100000000)
+    # print("16 thread")
+    # tread_count = 16
+    # stress_test(tread_count, 10000)
+    # stress_test(tread_count, 100000)
+    # stress_test(tread_count, 1000000)
+    # stress_test(tread_count, 10000000)
+    # stress_test(tread_count, 100000000)
 
-    print("32 thread")
-    tread_count = 32
-    stress_test(tread_count, 10000)
-    stress_test(tread_count, 100000)
-    stress_test(tread_count, 1000000)
-    stress_test(tread_count, 10000000)
-    stress_test(tread_count, 100000000)
+    # print("32 thread")
+    # tread_count = 32
+    # stress_test(tread_count, 10000)
+    # stress_test(tread_count, 100000)
+    # stress_test(tread_count, 1000000)
+    # stress_test(tread_count, 10000000)
+    # stress_test(tread_count, 100000000)
